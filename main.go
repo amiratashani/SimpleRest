@@ -9,6 +9,7 @@ import (
 )
 
 type Article struct {
+	Id      string `json:"id"`
 	Title   string `json:"title"`
 	Desc    string `json:"desc"`
 	Content string `json:"content"`
@@ -20,8 +21,8 @@ func main() {
 	fmt.Println("Rest API v2.0 -Mux Routers")
 
 	Articles = []Article{
-		Article{Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		Article{Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
+		Article{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+		Article{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
 
 	handleRequests()
@@ -37,10 +38,22 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Articles)
 }
 
+func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	for _, article := range Articles {
+		if article.Id == key {
+			json.NewEncoder(w).Encode(article)
+		}
+	}
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/all", returnAllArticles)
+	myRouter.HandleFunc("/articles/{id}", returnSingleArticle)
 
 	log.Fatal(http.ListenAndServe(":10000", myRouter))
 }
